@@ -14,7 +14,7 @@ use serde_json::{json, Value};
 use std::{io::ErrorKind, time};
 
 use crate::utils::file_util;
-use crate::services::file_service::MultipartHandler;
+use crate::services::{file_service::MultipartHandler, s3_service::Client};
 
 #[derive(Debug, FromForm)]
 pub struct UploadForm<'a> {
@@ -36,25 +36,32 @@ pub async fn upload_file(
             return status::Custom(Status::BadRequest, message);
         })?;
 
-    let file_data = multipart.save_to_file().await.unwrap();
+
+    let s3_file_url = Client::new().put_object(multipart).await.map_err(|e| {
+            let message =
+                json!({"success": false, "message": format!("Upload Failed with error: {:#?}", e)});
+            return status::Custom(Status::NetworkAuthenticationRequired, message);
+    })?;
+    println!("s3_file_url: {}", s3_file_url.clone());
+    // let file_data = multipart.save_to_file().await.unwrap();
 
     let elapsed = initial_time.elapsed();
-    let message = json!({"success": true, "message": "Upload Successful", "data": file_data, "elapsed": {"value": elapsed.as_millis() as u32, "unit": "milliseconds"}});
+    let message = json!({"success": true, "message": "Upload Successful", "data": s3_file_url, "elapsed": {"value": elapsed.as_millis() as u32, "unit": "milliseconds"}});
 
     Ok(status::Custom(Status::Ok, message))
 }
 
-#[get("/<filename>")]
-pub async fn download_file(filename: &str) -> Result<DownloadResponse, Status> {
-    let file = format!("{}/{}", file_util::STORAGE_DIRECTORY, filename);
-    let path = std::path::Path::new(&file);
-    DownloadResponse::from_file(path, None::<String>, None)
-        .await
-        .map_err(|err| {
-            if err.kind() == ErrorKind::NotFound {
-                Status::NotFound
-            } else {
-                Status::InternalServerError
-            }
-        })
-}
+// #[get("/<filename>")]
+// pub async fn download_file(filename: &str) -> Result<DownloadResponse, Status> {
+//     let file = format!("{}/{}", file_util::STORAGE_DIRECTORY, filename);
+//     let path = std::path::Path::new(&file);
+//     DownloadResponse::from_file(path, None::<String>, None)
+//         .await
+//         .map_err(|err| {
+//             if err.kind() == ErrorKind::NotFound {
+//                 Status::NotFound
+//             } else {
+//                 Status::InternalServerError
+//             }
+//         })
+// }

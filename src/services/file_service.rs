@@ -27,8 +27,6 @@ impl MultipartHandler {
         ]);
         let mut multipart_form_data =
             MultipartFormData::parse(&content_type, form_data, options).await?;
-        // .map_err(|e| e.into())?;
-        // .map_err(|e| TransmissionError::Message("Failed to parse"))?;
 
         let content = multipart_form_data
             .raw
@@ -51,20 +49,14 @@ impl MultipartHandler {
         let path = async_std::path::Path::new(STORAGE_DIRECTORY);
         if !path.exists().await {
             async_std::fs::create_dir(path).await?;
-            // .map_err(|e| e.into());
-            // .map_err(|e| TransmissionError::Message("Failed to save data to file"))?;
         }
 
         let mut file =
             async_std::fs::File::create(format!("{}/{}", STORAGE_DIRECTORY, self.file_name))
                 .await?;
 
-        // .map_err(|e| e.into())?;
-        // .map_err(|e| TransmissionError::Message("Failed to save data to file"))?;
-
         file.write_all(&self.raw).await?;
-        // .map_err(|e| e.into());
-        // .map_err(|e| TransmissionError::Message("Failed to save data to file"))?;
+
         file.sync_all().await?;
         let meta_data = file.metadata().await?;
 

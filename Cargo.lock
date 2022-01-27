@@ -548,6 +548,8 @@ dependencies = [
  "rocket",
  "rocket-download-response",
  "rocket-multipart-form-data",
+ "rusoto_core",
+ "rusoto_credential",
  "rusoto_s3",
  "serde",
  "serde_json",

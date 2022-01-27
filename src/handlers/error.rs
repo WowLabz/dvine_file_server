@@ -6,6 +6,7 @@ pub enum TransmissionError {
     IOError(async_std::io::Error),
     MultipartFormError(MultipartFormDataError),
     Message(String),
+    S3PutObjectError(rusoto_core::RusotoError<rusoto_s3::PutObjectError>),
 }
 
 impl From<rocket::Error> for TransmissionError {
@@ -29,5 +30,11 @@ impl From<MultipartFormDataError> for TransmissionError {
 impl From<String> for TransmissionError {
     fn from(e: String) -> Self {
         Self::Message(e)
+    }
+}
+
+impl From<rusoto_core::RusotoError<rusoto_s3::PutObjectError>> for TransmissionError {
+    fn from(error: rusoto_core::RusotoError<rusoto_s3::PutObjectError>) -> Self {
+        Self::S3PutObjectError(error)
     }
 }
