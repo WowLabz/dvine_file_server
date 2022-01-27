@@ -17,7 +17,7 @@ use serde_json::{json, Value};
 
 #[get("/")]
 fn api_home() -> status::Custom<Value> {
-    let message = json!({"success": true, "message": "Authentication Server"});
+    let message = json!({"success": true, "message": "Dvine File Server"});
     status::Custom(Status::Ok, message)
 }
 
