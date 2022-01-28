@@ -78,7 +78,6 @@ async fn rocket() -> _ {
             "/files",
             routes![
                 controller::upload_file,
-                controller::download_file,
             ],
         )
         .attach(CORS)

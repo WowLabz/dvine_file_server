@@ -42,7 +42,7 @@ impl Client {
     pub fn url(&self, key: &str) -> String {
         dotenv::dotenv().ok();
         let url_str = format!(
-            "https://{}.s3.{}.amazonaws.com/vines/{}",
+            "https://{}.s3.{}.amazonaws.com/{}",
             std::env::var("AWS_S3_BUCKET_NAME").expect("aws env config not set"),
             std::env::var("AWS_REGION").expect("aws env config not set"),
             key
@@ -52,9 +52,10 @@ impl Client {
     }
 
     pub async fn put_object(&self, multipart: MultipartHandler) -> Result<String, RusotoError<PutObjectError>> {
+        let key = format!("vines/{}", multipart.file_name.to_owned());
          let put_request = PutObjectRequest {
             bucket: self.bucket_name.to_owned(),
-            key: multipart.file_name.to_owned(),
+            key: key.clone(),
             body: Some(multipart.raw.into()),
             ..Default::default()
         };
@@ -64,6 +65,6 @@ impl Client {
             .put_object(put_request)
             .await?;
 
-        Ok(self.url(&multipart.file_name))
+        Ok(self.url(&key))
     }
 }
