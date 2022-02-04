@@ -6,6 +6,7 @@ mod handlers;
 mod models;
 mod services;
 mod utils;
+mod config;
 
 use rocket::{
     fairing::{Fairing, Info, Kind},
